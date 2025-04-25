@@ -15,7 +15,7 @@ def display_banner():
     Display ASCII banner.
     """
 
-    banner = pyfiglet.figlet_format("HashCatnip")
+    banner = pyfiglet.figlet_format("Hash Catnip")
     print(banner)
 
 
@@ -29,7 +29,7 @@ def get_user_input():
     parser = optparse.OptionParser(
         usage="usage: %prog -H <enter_your_hash_to_crack> -l <enter_you_wordlist_path",
         description="Utility to automate Hashcat usage.",
-        epilog="""By Taji Abdullah https://coded-alchemy.github.io"""
+        epilog="""By Taji Abdullah https://coded-alchemy.github.io\n"""
     )
     parser.add_option('-H', dest='hash', type='string', help='specify hash to crack.')
     parser.add_option('-l', dest='word_list', type='string', help='specify word list location.')
@@ -66,20 +66,22 @@ def display_hash_mode_options():
     Display Hashcat output to select hash mode.
     """
 
-    # Command to run Hashcat with the --show option
-    command = ['hashcat', '--show', DEFAULT_HASH_FILE]
+    try:
+        # Command to run Hashcat with the --show option
+        command = ['hashcat', '--show', DEFAULT_HASH_FILE]
 
-    # Run the command
-    result = subprocess.run(command, capture_output=True, text=True)
+        # Run the command
+        result = subprocess.run(command, capture_output=True, text=True)
 
-    # Print the results of the command
-    print(result.stdout)
+        # Print the results of the command
+        print(result.stdout)
 
-    # Print any errors (if there are any)
-
-
-#    if result.stderr:
-#        print(result.stderr)
+        # Print any errors (if there are any)
+    #    if result.stderr:
+    #        print(result.stderr)
+    except FileNotFoundError:
+        print("Unable to complete, is Hashcat installed?\n")
+        exit()
 
 
 def crack_hash():
@@ -92,15 +94,20 @@ def crack_hash():
         print("Invalid input! Please enter a valid integer for hash mode.")
         return
 
-    command = ['hashcat', '-m', str(hash_mode), '-a', '0', DEFAULT_HASH_FILE, WORD_LIST]
-    result = subprocess.run(command, capture_output=True, text=True)
+    try:
+        command = ['hashcat', '-m', str(hash_mode), '-a', '0', DEFAULT_HASH_FILE, WORD_LIST]
+        result = subprocess.run(command, capture_output=True, text=True)
 
-    if result.returncode == 0:
-        print("Hashcat cracked the hash:")
-        print(result.stdout)
-    else:
-        print("Hashcat failed to crack the hash.")
-        print(f"Error: {result.stderr}")
+        if result.returncode == 0:
+            print("Hashcat cracked the hash:")
+            print(result.stdout)
+        else:
+            print("Hashcat failed to crack the hash.")
+            print(f"Error: {result.stderr}")
+
+    except FileNotFoundError:
+        print("Unable to complete, is Hashcat installed?\n")
+        exit()
 
 
 def main():
