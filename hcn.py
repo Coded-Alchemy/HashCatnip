@@ -4,7 +4,6 @@ import optparse
 import pyfiglet
 import subprocess
 
-
 # Constants
 HASH = ""
 WORD_LIST = ""
@@ -43,6 +42,7 @@ def get_user_input():
 
     HASH = options.hash
 
+    # Ensure a word list is provided
     if not options.word_list:
         parser.error("A word list is required. Use -l to specify it.")
 
@@ -61,22 +61,31 @@ def store_hash_in_file():
         file.write(HASH)
 
 
-def use_hashcat():
+def display_hash_mode_options():
+    """
+    Display Hashcat output to select hash mode.
+    """
+
     # Command to run Hashcat with the --show option
     command = ['hashcat', '--show', DEFAULT_HASH_FILE]
 
     # Run the command
     result = subprocess.run(command, capture_output=True, text=True)
 
-    # Print the standard output (results of the command)
+    # Print the results of the command
     print(result.stdout)
 
     # Print any errors (if there are any)
+
+
 #    if result.stderr:
 #        print(result.stderr)
 
 
-def do_crack():
+def crack_hash():
+    """
+    Attempt to crack the hash with Hashcat.
+    """
     try:
         hash_mode = int(input("Enter hash mode number: "))
     except ValueError:
@@ -102,8 +111,8 @@ def main():
     display_banner()
     get_user_input()
     store_hash_in_file()
-    use_hashcat()
-    do_crack()
+    display_hash_mode_options()
+    crack_hash()
 
 
 if __name__ == '__main__':
