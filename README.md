@@ -1,5 +1,4 @@
-# HashCatnip  
-  
+# HashCatnip   
 This script automates Hashcat usage.  
   
 ### Usage  
