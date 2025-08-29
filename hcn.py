@@ -5,7 +5,7 @@ import pyfiglet
 import subprocess
 
 # Constants
-HASH = ""
+HASHES = []
 WORD_LIST = ""
 DEFAULT_HASH_FILE = "hash.txt"
 
@@ -24,23 +24,24 @@ def get_user_input():
     Get input from the user.
     """
 
-    global HASH, WORD_LIST
+    global HASHES, WORD_LIST
 
     parser = optparse.OptionParser(
-        usage="usage: %prog -H <enter_your_hash_to_crack> -l <enter_you_wordlist_path",
+        usage="usage: %prog -H <hash1,hash2,...> -l <enter_you_wordlist_path",
         description="Utility to automate Hashcat usage.",
         epilog="""By Taji Abdullah https://coded-alchemy.github.io\n"""
     )
-    parser.add_option('-H', dest='hash', type='string', help='specify hash to crack.')
-    parser.add_option('-l', dest='word_list', type='string', help='specify word list location.')
+    parser.add_option('-H', dest='hashes', type='string', help='Specify one or more hashes to crack, separated by commas.')
+    parser.add_option('-l', dest='word_list', type='string', help='Specify word list location.')
 
     (options, args) = parser.parse_args()
 
-    # Ensure a hash is provided
-    if not options.hash:
-        parser.error("A hash is required. Use -H to specify it.")
+    # Ensure hashes are provided
+    if not options.hashes:
+        parser.error("At least one hash is required. Use -H to specify it.")
 
-    HASH = options.hash
+    # Split hashes into a list
+    HASHES = [h.strip() for h in options.hashes.split(',') if h.strip()]
 
     # Ensure a word list is provided
     if not options.word_list:
@@ -51,14 +52,15 @@ def get_user_input():
 
 def store_hash_in_file():
     """
-    Store hash in file to pass into Hashcat.
+    Store hashes in file to pass into Hashcat.
     """
 
-    global HASH, DEFAULT_HASH_FILE
+    global HASHES, DEFAULT_HASH_FILE
 
     # Open the file in write mode and store the hash
     with open(DEFAULT_HASH_FILE, 'w') as file:
-        file.write(HASH)
+        for h in HASHES:
+            file.write(h + "\n")
 
 
 def display_hash_mode_options():
@@ -76,9 +78,6 @@ def display_hash_mode_options():
         # Print the results of the command
         print(result.stdout)
 
-        # Print any errors (if there are any)
-    #    if result.stderr:
-    #        print(result.stderr)
     except FileNotFoundError:
         print("Unable to complete, is Hashcat installed?\n")
         exit()
@@ -99,7 +98,7 @@ def crack_hash():
         result = subprocess.run(command, capture_output=True, text=True)
 
         if result.returncode == 0:
-            print("Hashcat cracked the hash:")
+            print("Hashcat cracked one or more hashes:")
             print(result.stdout)
         else:
             print("Hashcat failed to crack the hash.")
