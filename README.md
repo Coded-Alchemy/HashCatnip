@@ -4,8 +4,6 @@ This script automates Hashcat usage.
 ### Usage  
 `python hcn.py -H <hash1,hash2,...> -l <enter your wordlist>`
 
-[Watch the video](https://github.com/Coded-Alchemy/HashCatnip/dev/assets/Screencast.mp4)
-
 See [Blog Post](https://technofiles.hashnode.dev/hash-catnip) for more info.
 
 ### Requirements  
