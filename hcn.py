@@ -14,7 +14,6 @@ def display_banner():
     """
     Display ASCII banner.
     """
-
     banner = pyfiglet.figlet_format("Hash Catnip")
     print(banner)
 
@@ -23,7 +22,6 @@ def get_user_input():
     """
     Get input from the user.
     """
-
     global HASHES, WORD_LIST
 
     parser = optparse.OptionParser(
@@ -31,6 +29,7 @@ def get_user_input():
         description="Utility to automate Hashcat usage.",
         epilog="""By Taji Abdullah https://coded-alchemy.github.io\n"""
     )
+
     parser.add_option('-H', dest='hashes', type='string', help='Specify one or more hashes to crack, separated by commas.')
     parser.add_option('-l', dest='word_list', type='string', help='Specify word list location.')
 
@@ -54,7 +53,6 @@ def store_hash_in_file():
     """
     Store hashes in file to pass into Hashcat.
     """
-
     global HASHES, DEFAULT_HASH_FILE
 
     # Open the file in write mode and store the hash
@@ -67,7 +65,6 @@ def display_hash_mode_options():
     """
     Display Hashcat output to select hash mode.
     """
-
     try:
         # Command to run Hashcat with the --show option
         command = ['hashcat', '--show', DEFAULT_HASH_FILE]
@@ -113,7 +110,6 @@ def main():
     """
     Main entry point for the script.
     """
-
     display_banner()
     get_user_input()
     store_hash_in_file()
