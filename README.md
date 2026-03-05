@@ -3,7 +3,7 @@ Automation wrapper for Hashcat that streamlines multi-hash cracking workflows us
 
 Hash Catnip reduces repetitive command-line overhead and improves workflow efficiency during password auditing and lab-based testing.
 
-### Purpose
+## Purpose
 
 When working with Hashcat in lab or red-team simulations, cracking multiple hashes typically requires:
 - Formatting input files
@@ -19,26 +19,26 @@ Hash Catnip simplifies this process by allowing users to:
 
 This tool is designed for educational use, lab environments, and authorized security testing only.
 
-### Features
+## Features
 - Multi-hash support via comma-separated input
 - Wordlist-based cracking
 - Lightweight Python CLI interface
 - Direct Hashcat execution from script
 - Simplified workflow for lab exercises
 
-### Requirements    
+## Requirements    
 - Python 3.x 
 - Hashcat installed and accessible from terminal
 - Valid wordlist file
 
-### Installation
+## Installation
 Clone the repository:
 	```git clone https://github.com/Coded-Alchemy/HashCatnip.git; cd HashCatnip```
 
 Or download directly:
 	```curl -L -O https://raw.githubusercontent.com/Coded-Alchemy/HashCatnip/dev/hcn.py```
 
-### Usage  
+## Usage  
 Run the script with:
 	```python hcn.py -H <hash1,hash2,...> -l <path_to_wordlist>``` 
 
@@ -56,7 +56,7 @@ This will:
   
 See [Blog Post](https://technofiles.hashnode.dev/hash-catnip) for more info. 
   
-### Security & Ethical Use
+## Security & Ethical Use
 This tool is intended strictly for:
 - Cybersecurity education
 - Home lab experimentation
@@ -65,7 +65,7 @@ This tool is intended strictly for:
 
 Do not use this tool against systems or data you do not own or have explicit permission to test.
 
-### Why This Project Matters
+## Why This Project Matters
 This project demonstrates:
 - Automation mindset
 - CLI tool development
@@ -75,6 +75,6 @@ This project demonstrates:
 
 This script shows how small automation tools can significantly improve operational efficiency.
 
-### Author
+## Author
 Taji Abdullah
 Security Analyst | Detection Engineering | Security Automation
