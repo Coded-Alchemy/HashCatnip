@@ -1,14 +1,12 @@
 # HashCatnip.py
 
-import optparse
+import argparse
 import pyfiglet
 import subprocess
-
-# Constants
-HASHES = []
-WORD_LIST = ""
-DEFAULT_HASH_FILE = "hash.txt"
-
+import tempfile
+import os
+import sys
+import shutil
 
 def display_banner():
     """
@@ -22,88 +20,105 @@ def get_user_input():
     """
     Get input from the user.
     """
-    global HASHES, WORD_LIST
-
-    parser = optparse.OptionParser(
-        usage="usage: %prog -H <hash1,hash2,...> -l <enter_you_wordlist_path",
-        description="Utility to automate Hashcat usage.",
-        epilog="""By Taji Abdullah https://coded-alchemy.github.io\n"""
+    parser = argparse.ArgumentParser(
+        description="Hash Catnip 2.0 - Hashcat Automation Utility"
     )
 
-    parser.add_option('-H', dest='hashes', type='string', help='Specify one or more hashes to crack, separated by commas.')
-    parser.add_option('-l', dest='word_list', type='string', help='Specify word list location.')
+    parser.add_argument(
+        "-H", "--hashes",
+        required=True,
+        help="Comma-separated hashes to crack"
+    )
 
-    (options, args) = parser.parse_args()
+    parser.add_argument(
+        "-l", "--wordlist",
+        required=True,
+        help="Path to wordlist"
+    )
 
-    # Ensure hashes are provided
-    if not options.hashes:
-        parser.error("At least one hash is required. Use -H to specify it.")
+    parser.add_argument(
+        "-m", "--mode",
+        required=True,
+        type=int,
+        help="Hashcat hash mode (e.g., 0 for MD5)"
+    )
 
-    # Split hashes into a list
-    HASHES = [h.strip() for h in options.hashes.split(',') if h.strip()]
+    parser.add_argument(
+        "-a", "--attack-mode",
+        type=int,
+        default=0,
+        help="Hashcat attack mode (default: 0 - straight)"
+    )
 
-    # Ensure a word list is provided
-    if not options.word_list:
-        parser.error("A word list is required. Use -l to specify it.")
+    parser.add_argument(
+        "-o", "--output",
+        help="Optional output file to store cracked hashes"
+    )
 
-    WORD_LIST = options.word_list
+    parser.add_argument(
+        "--rules",
+        help="Optional rule file"
+    )
+
+    parser.add_argument(
+        "--session",
+        help="Optional hashcat session name"
+    )
+
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress banner"
+    )
+
+    return parser.parse_args()
 
 
-def store_hash_in_file():
-    """
-    Store hashes in file to pass into Hashcat.
-    """
-    global HASHES, DEFAULT_HASH_FILE
+def validate_environment(wordlist_path):
+    if not os.path.isfile(wordlist_path):
+        print("[-] Wordlist file does not exist.")
+        sys.exit(1)
 
-    # Open the file in write mode and store the hash
-    with open(DEFAULT_HASH_FILE, 'w') as file:
-        for h in HASHES:
-            file.write(h + "\n")
+    if not shutil.which("hashcat"):
+        print("[-] Hashcat is not installed or not in PATH.")
+        sys.exit(1)
 
 
-def display_hash_mode_options():
-    """
-    Display Hashcat output to select hash mode.
-    """
+def create_temp_hash_file(hashes):
+    temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w')
+    for h in hashes:
+        temp_file.write(h.strip() + "\n")
+    temp_file.close()
+    return temp_file.name
+
+
+def build_hashcat_command(args, hash_file):
+    command = [
+        "hashcat",
+        "-m", str(args.mode),
+        "-a", str(args.attack_mode),
+        hash_file,
+        args.wordlist
+    ]
+
+    if args.rules:
+        command.extend(["-r", args.rules])
+
+    if args.output:
+        command.extend(["-o", args.output])
+
+    if args.session:
+        command.extend(["--session", args.session])
+
+    return command
+
+
+def run_hashcat(command):
     try:
-        # Command to run Hashcat with the --show option
-        command = ['hashcat', '--show', DEFAULT_HASH_FILE]
-
-        # Run the command
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        # Print the results of the command
-        print(result.stdout)
-
-    except FileNotFoundError:
-        print("Unable to complete, is Hashcat installed?\n")
-        exit()
-
-
-def crack_hash():
-    """
-    Attempt to crack the hash with Hashcat.
-    """
-    try:
-        hash_mode = int(input("Enter hash mode number: "))
-    except ValueError:
-        print("Invalid input! Please enter a valid integer for hash mode.")
-        return
-
-    try:
-        command = ['hashcat', '-m', str(hash_mode), '-a', '0', DEFAULT_HASH_FILE, WORD_LIST]
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        if result.returncode == 0:
-            print("Hashcat cracked one or more hashes:")
-            print(result.stdout)
-        else:
-            print("Hashcat failed to crack the hash.")
-            print(f"Error: {result.stderr}")
-
-    except FileNotFoundError:
-        print("Unable to complete, is Hashcat installed?\n")
-        exit()
+        subprocess.run(command)
+    except KeyboardInterrupt:
+        print("\n[!] Interrupted by user.")
+        sys.exit(1)
 
 
 def main():
@@ -111,10 +126,14 @@ def main():
     Main entry point for the script.
     """
     display_banner()
-    get_user_input()
-    store_hash_in_file()
-    display_hash_mode_options()
-    crack_hash()
+    args = get_user_input()
+    hashes = [h.strip() for h in args.hashes.split(",") if h.strip()]
+    validate_environment(args.wordlist)
+    hash_file = create_temp_hash_file(hashes)
+    command = build_hashcat_command(args, hash_file)
+    print("[*] Running:", " ".join(command))
+    run_hashcat(command)
+    os.remove(hash_file)
 
 
 if __name__ == '__main__':
